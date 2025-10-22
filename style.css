@@ -1,0 +1,115 @@
+:root {
+    --grisClair: #F6F6F6;
+    --grisNuance2: #DBD9D9;
+    --grisNuance3: #757575;
+    --grisFonce: #3c3c3cad;
+    --blanc: white;
+    --noir: black;
+    --vert: #145814;
+    --vert-Fonce: #093109;
+    --FondNoirTranslucide: rgba(0, 0, 0, 0.3);
+    --rougeRupture: #e61515;
+    --flou:blur(10px);
+    --ombre1: rgba(45, 49, 49, 0.15) 0px 2px 8px 0px;
+    --ombre2: rgba(45, 49, 49, 0.1) 0px 4px 12px 0px;
+    --ombreForte: 0 0 20px 4px rgb(0 0 0 / 45%);
+    --ombreMoyenne: 0 0 16px 0px rgb(0 0 0 / 35%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+html,
+body {
+    background-color: var(--grisClair);
+}
+
+.BarreCommande{
+    display: flex;
+    position: relative;
+    bottom: 50px;
+}
+
+.lecteur-video .btn{
+    cursor: pointer;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--FondNoirTranslucide);
+    backdrop-filter: var(--flou);
+    border-radius: 20rem;
+    border: unset;
+    z-index: 10;
+    transition: all 0.3s ease-in-out;
+}
+.lecteur-video .btn:hover{
+    background-color: var(--grisFonce);
+    border-radius: 20rem;
+}
+.lecteur-video #play, .lecteur-video #pause{
+    position: relative;
+    left: 10px;
+}
+#play svg{
+    margin-left: 5px;
+}
+.lecteur-video #pause.cache,.lecteur-video #play.cache,#Volumeoff.cache,#Volumeon.cache{
+    display: none;
+}
+
+.lecteur-video #Volume #ProgressVolume,.lecteur-video #ProgresseLecture{
+    display: flex;
+    position: absolute;
+    left: 40px;
+    width: 0px;
+    height: 5px;
+    border-radius: 20rem;
+    background-color: var(--grisNuance3);
+    transition: all 0.3s ease-in-out;
+}
+
+.lecteur-video #ProgresseLecture{
+    width: 95%;
+    bottom: 50px;
+    left: 15px;
+    cursor: pointer;
+}
+
+.lecteur-video #ProgresseLecture #NiveauLecture,.lecteur-video #ProgresseLecture #NiveauChargement{
+    background-color: var(--blanc);
+    height: 100%;
+    border-radius: 20rem;
+}
+
+.lecteur-video #Volume #ProgressVolume #NiveauVolume,.lecteur-video #ProgresseLecture #NiveauChargement{
+    background-color: var(--blanc);
+    height: 100%;
+    border-radius: 20rem;
+}
+
+.lecteur-video #Volume{
+    position: relative;
+    left: 20px;
+}
+
+.lecteur-video #Volume svg{
+    position: absolute;
+    top: 7px;
+    left: 6px;
+}
+
+.lecteur-video #Volume:hover{
+    width: 120px;
+}
+
+.lecteur-video #Volume:hover #ProgressVolume{
+    display: flex;
+    width: 70px;
+
+}
