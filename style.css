@@ -6,10 +6,11 @@
     --blanc: white;
     --noir: black;
     --vert: #145814;
+    --grisvertclair: #719671;
     --vert-Fonce: #093109;
     --FondNoirTranslucide: rgba(0, 0, 0, 0.3);
     --rougeRupture: #e61515;
-    --flou:blur(10px);
+    --flou: blur(10px);
     --ombre1: rgba(45, 49, 49, 0.15) 0px 2px 8px 0px;
     --ombre2: rgba(45, 49, 49, 0.1) 0px 4px 12px 0px;
     --ombreForte: 0 0 20px 4px rgb(0 0 0 / 45%);
@@ -28,13 +29,13 @@ body {
     background-color: var(--grisClair);
 }
 
-.BarreCommande{
+.BarreCommande {
     display: flex;
     position: relative;
     bottom: 50px;
 }
 
-.lecteur-video .btn{
+.lecteur-video .btn {
     cursor: pointer;
     display: flex;
     justify-content: space-around;
@@ -48,22 +49,33 @@ body {
     z-index: 10;
     transition: all 0.3s ease-in-out;
 }
-.lecteur-video .btn:hover{
+
+.lecteur-video .btn:hover {
     background-color: var(--grisFonce);
     border-radius: 20rem;
 }
-.lecteur-video #play, .lecteur-video #pause{
+
+.lecteur-video #play,
+.lecteur-video #pause {
     position: relative;
     left: 10px;
 }
-#play svg{
+
+#play svg {
     margin-left: 5px;
 }
-.lecteur-video #pause.cache,.lecteur-video #play.cache,#Volumeoff.cache,#Volumeon.cache{
+
+.lecteur-video #pause.cache,
+.lecteur-video #play.cache,
+#Volumeoff.cache,
+#Volumeon.cache,
+.lecteur-video #fullscreen.cache,
+.lecteur-video #fullscreenoff.cache {
     display: none;
 }
 
-.lecteur-video #Volume #ProgressVolume,.lecteur-video #ProgresseLecture{
+.lecteur-video #Volume #ProgressVolume,
+.lecteur-video #ProgresseLecture {
     display: flex;
     position: absolute;
     left: 40px;
@@ -74,42 +86,100 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
-.lecteur-video #ProgresseLecture{
-    width: 95%;
+#miniatureCanvas {
+    display: none;
+    position: absolute;
+    top: -80px;
+    width: auto;
+    height: auto;
+    border-radius: 1rem;
+    border: 5px solid var(--FondNoirTranslucide);
+}
+
+.lecteur-video #fullscreen,.lecteur-video #fullscreenoff {
+    position: absolute;
+    right: 10px;
+}
+
+.lecteur-video #ProgresseLecture {
+    width: calc(100% - 30px);
     bottom: 50px;
-    left: 15px;
+    left: auto;
+    right: 15px;
+    margin: 0px auto;
     cursor: pointer;
 }
 
-.lecteur-video #ProgresseLecture #NiveauLecture,.lecteur-video #ProgresseLecture #NiveauChargement{
+.lecteur-video #ProgresseLecture #NiveauLecture,
+.lecteur-video #ProgresseLecture #NiveauChargement {
+    background-color: var(--blanc);
+    height: 100%;
+    border-radius: 20rem;
+    position: relative;
+    left: 0px;
+    z-index: 3;
+}
+
+.lecteur-video #ProgresseLecture #NiveauChargement {
+    position: absolute;
+    left: 0px;
+    z-index: 2;
+}
+
+.lecteur-video #Volume #ProgressVolume #NiveauVolume {
     background-color: var(--blanc);
     height: 100%;
     border-radius: 20rem;
 }
 
-.lecteur-video #Volume #ProgressVolume #NiveauVolume,.lecteur-video #ProgresseLecture #NiveauChargement{
-    background-color: var(--blanc);
-    height: 100%;
-    border-radius: 20rem;
+.lecteur-video #ProgresseLecture #NiveauChargement {
+    background-color: var(--grisvertclair);
 }
 
-.lecteur-video #Volume{
+.lecteur-video #Volume {
     position: relative;
     left: 20px;
 }
 
-.lecteur-video #Volume svg{
+.lecteur-video #Volume svg {
     position: absolute;
     top: 7px;
     left: 6px;
 }
 
-.lecteur-video #Volume:hover{
+.lecteur-video #Volume:hover {
     width: 120px;
 }
 
-.lecteur-video #Volume:hover #ProgressVolume{
+.lecteur-video #Volume:hover #ProgressVolume {
     display: flex;
     width: 70px;
 
+}
+
+.lecteur-video {
+    width: 100%;
+    max-width: 1000px;
+    position: relative;
+    background-color: #000;
+}
+.lecteur-video video {
+    width: 100%;
+    height: auto; 
+    display: block; 
+}
+.lecteur-video:fullscreen {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none; 
+}
+.lecteur-video:fullscreen video {
+    height: 100%;
+    object-fit: contain;
+}
+
+.lecteur-video #Download {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
