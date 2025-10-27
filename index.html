@@ -10,7 +10,7 @@
 
 <body>
     <div class="lecteur-video">
-        <video id="maVideo" src=""></video>
+        <video id="maVideo" src="videoplayback.mp4"></video>
         <button class="btn" id="Download" onclick="downloadVideo()">
             <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -58,6 +58,10 @@
                         <div id="NiveauVolume" style="width: 50%;"></div>
                     </div>
                 </button>
+                
+                <button class="btn" id="Time" onclick="">
+                    <p>0:00 / 0:00</p>
+                </button>
 
             </div>
             <button class="btn" id="fullscreen" onclick="FullscreenOn()">
@@ -74,6 +78,7 @@
                         fill="white" />
                 </svg>
             </button>
+
         </div>
     </div>
 </body>

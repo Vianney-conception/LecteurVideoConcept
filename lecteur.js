@@ -1,7 +1,5 @@
-// --- VARIABLES GLOBALES ET CONSTANTES ---
-
-const video = document.getElementById('maVideo'); // La vidéo principale
-const lecteurVideo = document.querySelector('.lecteur-video'); 
+const video = document.getElementById('maVideo');
+const lecteurVideo = document.querySelector('.lecteur-video');
 const niveauChargement = document.getElementById('NiveauChargement');
 const niveauLecture = document.getElementById('NiveauLecture');
 const play = document.getElementById('play');
@@ -13,21 +11,18 @@ const VolumeonBtn = document.getElementById('Volumeon');
 const canvas = document.getElementById('miniatureCanvas');
 const ctx = canvas.getContext('2d');
 const progresseLecture = document.getElementById('ProgresseLecture');
-
-// --- Constantes pour le plein écran ---
 const fullscreenBtn = document.getElementById('fullscreen');
 const fullscreenOffBtn = document.getElementById('fullscreenoff');
-
-// --- La vidéo invisible pour les miniatures ---
+// MODIFIÉ: Récupérer le bouton ET le paragraphe pour l'affichage du temps
+const timeButton = document.getElementById('Time');
+const timeDisplay = timeButton.querySelector('p');
 const videoThumbnail = document.createElement('video');
 videoThumbnail.muted = true;
 videoThumbnail.preload = 'auto';
-videoThumbnail.crossOrigin = "anonymous"; // Pour la sécurité du canvas
-
-// Variable d'état
-let isScrubbing = false; // Pour savoir si on survole la barre
-
-// --- FONCTIONS DE CONTRÔLE (appelées par onclick) ---
+videoThumbnail.crossOrigin = "anonymous";
+let isScrubbing = false;
+// NOUVELLE LIGNE: Variable d'état pour le format de l'heure
+let isTimeRemaining = false;
 
 function playVideo() {
     video.play();
@@ -64,17 +59,14 @@ function Volumeon() {
     mettreAJourNiveauVolume();
 }
 
-// --- Fonctions de plein écran (globales) ---
-
 function FullscreenOn() {
-    // On demande le plein écran sur le conteneur complet
     if (lecteurVideo.requestFullscreen) {
         lecteurVideo.requestFullscreen();
-    } else if (lecteurVideo.mozRequestFullScreen) { // Firefox
+    } else if (lecteurVideo.mozRequestFullScreen) {
         lecteurVideo.mozRequestFullScreen();
-    } else if (lecteurVideo.webkitRequestFullscreen) { // Chrome, Safari, Opera
+    } else if (lecteurVideo.webkitRequestFullscreen) {
         lecteurVideo.webkitRequestFullscreen();
-    } else if (lecteurVideo.msRequestFullscreen) { // IE/Edge
+    } else if (lecteurVideo.msRequestFullscreen) {
         lecteurVideo.msRequestFullscreen();
     }
 }
@@ -82,39 +74,75 @@ function FullscreenOn() {
 function FullscreenOff() {
     if (document.exitFullscreen) {
         document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) { // Firefox
+    } else if (document.mozCancelFullScreen) {
         document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+    } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { // IE/Edge
+    } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
     }
 }
 
+// NOUVELLE FONCTION: Pour formater les secondes en MM:SS
+function formatTime(secondes) {
+    // Gérer le cas où la durée n'est pas encore disponible (NaN) ou est infinie
+    if (isNaN(secondes) || !isFinite(secondes)) {
+        return "0:00";
+    }
 
-// --- ÉCOUTEUR PRINCIPAL (quand le DOM est prêt) ---
+    const minutes = Math.floor(secondes / 60);
+    const resteSecondes = Math.floor(secondes % 60);
+    // padStart ajoute un '0' si le nombre de secondes est < 10
+    const secondesPadees = resteSecondes.toString().padStart(2, '0');
+    return `${minutes}:${secondesPadees}`;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-
-    // --- 1. Ajustement des dimensions et initialisation ---
-    // CETTE FONCTION EST ESSENTIELLE POUR LE MODE "PETIT ÉCRAN"
+    
+    // Fonction modifiée pour charger la miniature
     function ajusterDimensions() {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
             lecteurVideo.style.width = `${video.videoWidth}px`;
             lecteurVideo.style.height = `${video.videoHeight}px`;
 
-            // Initialiser la vidéo thumbnail
+            // On s'assure de ne définir la source qu'une seule fois
             if (!videoThumbnail.src) {
-                videoThumbnail.src = video.src;
+                const originalSrc = video.src;
+
+                // 1. Construire le nouveau nom de fichier
+                const dotIndex = originalSrc.lastIndexOf('.');
+                let pictureSrc = originalSrc; // Par défaut, la source originale
+
+                if (dotIndex > -1) {
+                    const baseName = originalSrc.substring(0, dotIndex);
+                    const extension = originalSrc.substring(dotIndex);
+                    pictureSrc = `${baseName}_Picture${extension}`;
+                }
+
+                // 2. Ajouter un gestionnaire d'erreur AVANT de définir la source
+                videoThumbnail.addEventListener('error', function handleThumbnailError() {
+                    console.warn(`Miniature '${pictureSrc}' non trouvée. Utilisation de la vidéo principale.`);
+                    videoThumbnail.src = originalSrc;
+                    videoThumbnail.removeEventListener('error', handleThumbnailError);
+                });
+
+                // 3. Tenter de charger la version _Picture
+                videoThumbnail.src = pictureSrc;
             }
         }
     }
-    video.addEventListener('loadedmetadata', ajusterDimensions);
-    if (video.readyState >= 1) { // Au cas où la vidéo est déjà chargée
+    
+    // MODIFIÉ: Ajout de l'appel à mettreAJourAffichageTemps
+    video.addEventListener('loadedmetadata', () => {
         ajusterDimensions();
+        mettreAJourAffichageTemps(); // Mettre à jour le temps total une fois chargé
+    });
+
+    if (video.readyState >= 1) {
+        ajusterDimensions();
+        mettreAJourAffichageTemps(); // Mettre à jour aussi si déjà chargé
     }
 
-    // --- 2. Mise à jour des barres de progression ---
     function mettreAJourNiveauChargement() {
         if (video.buffered.length > 0) {
             const pourcentCharge = (video.buffered.end(video.buffered.length - 1) / video.duration) * 100;
@@ -128,9 +156,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const pourcentLecture = (video.currentTime / video.duration) * 100;
         niveauLecture.style.width = pourcentLecture + '%';
     }
-    video.addEventListener('timeupdate', mettreAJourNiveauLecture);
 
-    // Clic sur la barre de progression (contrôle la vidéo principale)
+    // MODIFIÉ: Mettre à jour le texte du temps en fonction de l'état
+    function mettreAJourAffichageTemps() {
+        const tempsActuel = video.currentTime;
+        const dureeTotale = video.duration;
+
+        if (isTimeRemaining) {
+            // Afficher le temps restant
+            const tempsRestant = dureeTotale - tempsActuel;
+            timeDisplay.textContent = `-${formatTime(tempsRestant)}`;
+        } else {
+            // Afficher le temps actuel / durée totale
+            timeDisplay.textContent = `${formatTime(tempsActuel)} / ${formatTime(dureeTotale)}`;
+        }
+    }
+
+    // MODIFIÉ: Ajout de l'appel à mettreAJourAffichageTemps
+    video.addEventListener('timeupdate', () => {
+        mettreAJourNiveauLecture();
+        mettreAJourAffichageTemps(); // Mettre à jour le temps actuel
+    });
+    
+    // NOUVELLE LIGNE: Ajout de l'écouteur de clic pour basculer l'affichage du temps
+    timeButton.addEventListener('click', () => {
+        isTimeRemaining = !isTimeRemaining; // Basculer l'état
+        mettreAJourAffichageTemps(); // Mettre à jour l'affichage immédiatement
+    });
+
     progresseLecture.addEventListener('click', function (e) {
         const rect = this.getBoundingClientRect();
         const positionX = e.clientX - rect.left;
@@ -142,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function () {
         niveauLecture.style.width = (pourcentClique * 100) + '%';
     });
 
-    // --- 3. Synchronisation des boutons Play/Pause ---
     video.addEventListener('play', function () {
         play.classList.add('cache');
         pause.classList.remove('cache');
@@ -156,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function () {
         pause.classList.add('cache');
     });
 
-    // --- 4. Gestion de la barre de volume ---
     progressVolume.addEventListener('click', function (e) {
         const rect = progressVolume.getBoundingClientRect();
         const positionX = e.clientX - rect.left;
@@ -166,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
         mettreAJourNiveauVolume();
     });
 
-    // --- 5. LOGIQUE DES MINIATURES ---
 
     function dessinerMiniature() {
         canvas.width = 120;
@@ -176,17 +226,17 @@ document.addEventListener('DOMContentLoaded', function () {
             canvas.style.display = 'block';
         } catch (e) {
             console.error("Erreur de dessin sur le canvas :", e);
-            canvas.style.display = 'none'; 
+            canvas.style.display = 'none';
         }
     }
-    
+
     videoThumbnail.addEventListener('seeked', function () {
         if (isScrubbing) {
             dessinerMiniature();
         }
     });
 
-    progresseLecture.addEventListener('mouseenter', function() {
+    progresseLecture.addEventListener('mouseenter', function () {
         if (video.readyState < 1) return;
         isScrubbing = true;
     });
@@ -202,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
         canvas.style.left = (e.clientX - rect.left - 60) + 'px';
 
         if (videoThumbnail.readyState >= 1) {
-             videoThumbnail.currentTime = temps;
+            videoThumbnail.currentTime = temps;
         }
     });
 
@@ -211,38 +261,30 @@ document.addEventListener('DOMContentLoaded', function () {
         isScrubbing = false;
         canvas.style.display = 'none';
     });
-    
-    // --- 6. Initialisation Volume ---
-    video.addEventListener('volumechange', mettreAJourNiveauVolume);
-    mettreAJourNiveauVolume(); // Appel initial
 
-    // --- 7. Synchronisation des boutons ET TAILLE Plein Écran (CORRIGÉ) ---
+    video.addEventListener('volumechange', mettreAJourNiveauVolume);
+    mettreAJourNiveauVolume();
+
 
     function syncFullscreenButtons() {
         const isFullscreen = document.fullscreenElement ||
-                             document.mozFullScreenElement ||
-                             document.webkitFullscreenElement ||
-                             document.msFullscreenElement;
+            document.mozFullScreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement;
 
         if (isFullscreen) {
-            // On est en plein écran
             fullscreenBtn.classList.add('cache');
             fullscreenOffBtn.classList.remove('cache');
-            
-            // On force le conteneur à 100% pour écraser le style en ligne
+
             lecteurVideo.style.width = '100%';
             lecteurVideo.style.height = '100%';
         } else {
-            // On n'est pas en plein écran
             fullscreenBtn.classList.remove('cache');
             fullscreenOffBtn.classList.add('cache');
-            
-            // On ré-applique la taille originale de la vidéo
-            ajusterDimensions(); 
+            ajusterDimensions();
         }
     }
 
-    // Écoute les changements d'état (API, touche "Échap", etc.)
     document.addEventListener('fullscreenchange', syncFullscreenButtons);
     document.addEventListener('webkitfullscreenchange', syncFullscreenButtons);
     document.addEventListener('mozfullscreenchange', syncFullscreenButtons);
@@ -253,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function downloadVideo() {
     const link = document.createElement('a');
     link.href = video.src;
-    link.download = 'ma-video.mp4'; 
+    link.download = 'ma-video.mp4';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

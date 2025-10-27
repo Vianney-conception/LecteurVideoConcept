@@ -56,7 +56,8 @@ body {
 }
 
 .lecteur-video #play,
-.lecteur-video #pause {
+.lecteur-video #pause,
+.lecteur-video #Time {
     position: relative;
     left: 10px;
 }
@@ -70,7 +71,8 @@ body {
 #Volumeoff.cache,
 #Volumeon.cache,
 .lecteur-video #fullscreen.cache,
-.lecteur-video #fullscreenoff.cache {
+.lecteur-video #fullscreenoff.cache,
+.lecteur-video #Time.cache {
     display: none;
 }
 
@@ -163,6 +165,17 @@ body {
     position: relative;
     background-color: #000;
 }
+
+.lecteur-video #Time{
+    width: 100px;
+    left: 30px;
+}
+
+.lecteur-video #Time p {
+    color: var(--blanc);
+    font-size: 14px;
+}
+
 .lecteur-video video {
     width: 100%;
     height: auto; 
